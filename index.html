@@ -3,34 +3,155 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Target Builder — SMART goals</title>
-    <style>
-      :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;line-height:1.4;color:#111}
-      body{max-width:42rem;margin:4rem auto;padding:1rem}
-      header h1{margin:0 0 .25rem}
-      .lead{color:#555;margin-top:0}
-      .card{border:1px solid #e6e6e6;padding:1rem;border-radius:8px;background:#fafafa}
-      a.button{display:inline-block;margin-top:1rem;padding:.5rem .75rem;border-radius:6px;background:#0366d6;color:white;text-decoration:none}
-    </style>
+    <title>Target Builder — Create clear, measurable learner targets for ProMonitor</title>
+    <meta name="description" content="Target Builder helps teaching staff create clear, measurable SMART targets for learners to copy into ProMonitor. No learner data is stored." />
+    <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
-    <header>
-      <h1>Target Builder</h1>
-      <p class="lead">A simple SMART target builder</p>
-    </header>
+    <div class="container">
+      <header class="site-header">
+        <div>
+          <h1>Target Builder</h1>
+          <p class="subtitle">Create clear, measurable learner targets for ProMonitor</p>
+          <p class="muted small">This tool does not store learner names or personal data. Do not enter learner names, medical or safeguarding details.</p>
+        </div>
+        <div class="actions">
+          <input id="search" placeholder="Describe the concern without using the learner’s name (e.g. ‘always late’, ‘missing Fridays’)" aria-label="Search concerns" />
+          <button id="searchBtn">Search</button>
+        </div>
+      </header>
 
-    <main>
-      <section class="card">
-        <p>This site helps you create SMART goals (Specific, Measurable, Achievable, Relevant, Time-bound).</p>
-        <p>Click the button below to get started building a target.</p>
-        <a class="button" href="#">Start building</a>
-      </section>
+      <main>
+        <section id="categoriesView">
+          <h2>Choose an area of concern</h2>
+          <p class="lead">Select a category to browse common issues or use the guided builder to craft a custom SMART target.</p>
 
-      <section style="margin-top:1rem;color:#666;font-size:.9rem">
-        <p>Repository: <a href="https://github.com/sean-p-clohessy/targetbuilder.github.io">sean-p-clohessy/targetbuilder.github.io</a></p>
-      </section>
-    </main>
+          <div id="categoriesGrid" class="grid" role="list"></div>
 
-    <footer style="margin-top:2rem;color:#999;font-size:.85rem">&copy; 2026 Target Builder</footer>
+          <div class="tools">
+            <button id="guidedBtn">Guided target builder</button>
+            <button id="startNewBtn" class="secondary" hidden>Start new target</button>
+          </div>
+        </section>
+
+        <section id="issuesView" class="hidden">
+          <button id="backToCategories" class="link">← Back to categories</button>
+          <h2 id="issuesTitle">Issues</h2>
+          <div id="issuesList" class="list" role="list"></div>
+        </section>
+
+        <section id="builderView" class="hidden">
+          <button id="backToIssues" class="link">← Back</button>
+          <h2 id="builderTitle">Target builder</h2>
+          <form id="builderForm">
+            <fieldset>
+              <legend>Required fields</legend>
+
+              <label for="categoryField">Area of concern</label>
+              <input id="categoryField" name="category" readonly />
+
+              <label for="issueField">Specific issue</label>
+              <input id="issueField" name="issue" readonly />
+
+              <label for="actionField">Expected learner action</label>
+              <input id="actionField" name="action" />
+
+              <label for="measureField">Frequency or success measure</label>
+              <select id="measureField" name="measure"></select>
+              <input id="customMeasure" placeholder="Custom measure (optional)" aria-label="Custom measure" />
+
+              <label for="durationField">Review period</label>
+              <select id="durationField" name="duration">
+                <option value="1 week">One week</option>
+                <option value="2 weeks">Two weeks</option>
+                <option value="3 weeks">Three weeks</option>
+                <option value="4 weeks">Four weeks</option>
+                <option value="by date">By selected date</option>
+                <option value="next review">At the next progress review</option>
+                <option value="custom">Custom</option>
+              </select>
+              <input id="reviewDate" type="date" aria-label="Review date" />
+              <input id="customDuration" placeholder="Custom period (e.g. 10 working days)" aria-label="Custom period" />
+
+              <label for="evidenceField">Evidence source</label>
+              <select id="evidenceField" name="evidence"></select>
+              <input id="customEvidence" placeholder="Custom evidence (optional)" aria-label="Custom evidence" />
+
+              <label for="reviewerField">Reviewer</label>
+              <select id="reviewerField" name="reviewer"></select>
+              <input id="customReviewer" placeholder="Custom reviewer (optional)" aria-label="Custom reviewer" />
+
+            </fieldset>
+
+            <div class="form-actions">
+              <button id="generateBtn" type="button">Generate target</button>
+              <button id="clearBtn" type="button" class="secondary">Clear</button>
+            </div>
+          </form>
+
+          <div id="preview" class="card hidden" aria-live="polite">
+            <h3>Generated target</h3>
+            <label for="learnerTarget">Learner target</label>
+            <textarea id="learnerTarget" rows="5"></textarea>
+            <div class="meta">
+              <span id="charCount">0</span> characters
+            </div>
+
+            <h4>Staff support action</h4>
+            <textarea id="staffAction" rows="3"></textarea>
+
+            <h4>Review note</h4>
+            <textarea id="reviewNote" rows="3"></textarea>
+
+            <div class="preview-actions">
+              <button id="copyLearner">Copy learner target</button>
+              <button id="copyStaff">Copy staff support action</button>
+              <button id="copyReview">Copy review note</button>
+              <button id="copyAll">Copy all</button>
+              <button id="printBtn" class="secondary">Print</button>
+            </div>
+
+            <div id="variantControls" class="variant-controls">
+              <button data-variant="supportive">Make more supportive</button>
+              <button data-variant="firmer">Make firmer</button>
+              <button data-variant="short">Short ProMonitor version</button>
+              <button data-variant="detailed">Add more detail</button>
+              <button data-variant="reset">Reset recommended wording</button>
+            </div>
+
+            <div id="smartQuality" class="quality">
+              <h4>SMART check</h4>
+              <ul>
+                <li id="qSpecific">Specific: <span class="status">—</span></li>
+                <li id="qMeasurable">Measurable: <span class="status">—</span></li>
+                <li id="qAchievable">Achievable: <span class="status">—</span></li>
+                <li id="qRelevant">Relevant: <span class="status">—</span></li>
+                <li id="qTimebound">Time-bound: <span class="status">—</span></li>
+              </ul>
+              <p class="muted small">Use professional judgement and adapt the wording to reflect the learner’s individual circumstances.</p>
+            </div>
+
+          </div>
+
+        </section>
+
+        <section id="searchResults" class="hidden">
+          <button id="backFromSearch" class="link">← Back</button>
+          <h2>Search results</h2>
+          <div id="searchList" class="list"></div>
+          <p id="noResults" class="muted hidden">No results found. Try different keywords or open the guided builder.</p>
+        </section>
+
+        <div id="status" aria-live="polite" class="sr-only"></div>
+      </main>
+
+      <footer class="site-footer">
+        <p>Target Builder provides suggested wording only. Staff should use professional judgement, follow college policies and adapt targets to the learner’s circumstances. Safeguarding, welfare and support concerns should be managed through the appropriate college processes.</p>
+        <p class="muted small">Do not enter learner names, medical information, safeguarding details or other personal data. This website does not store submitted information.</p>
+        <p class="muted small">© 2026 Target Builder</p>
+      </footer>
+    </div>
+
+    <script src="./app.js" defer></script>
   </body>
 </html>
