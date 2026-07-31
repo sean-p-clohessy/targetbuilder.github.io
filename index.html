@@ -1,157 +1,253 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Target Builder — Create clear, measurable learner targets for ProMonitor</title>
-    <meta name="description" content="Target Builder helps teaching staff create clear, measurable SMART targets for learners to copy into ProMonitor. No learner data is stored." />
-    <link rel="stylesheet" href="./styles.css">
-  </head>
-  <body>
-    <div class="container">
-      <header class="site-header">
-        <div>
-          <h1>Target Builder</h1>
-          <p class="subtitle">Create clear, measurable learner targets for ProMonitor</p>
-          <p class="muted small">This tool does not store learner names or personal data. Do not enter learner names, medical or safeguarding details.</p>
-        </div>
-        <div class="actions">
-          <input id="search" placeholder="Describe the concern without using the learner’s name (e.g. ‘always late’, ‘missing Fridays’)" aria-label="Search concerns" />
-          <button id="searchBtn">Search</button>
-        </div>
-      </header>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Create clear, measurable SMART learner targets locally in your browser.">
+  <title>SMART Target Builder</title>
+  <script>
+    try {
+      const savedTheme = localStorage.getItem("target-builder-theme");
+      if (savedTheme === "dark" || savedTheme === "light") document.documentElement.dataset.theme = savedTheme;
+    } catch {}
+  </script>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
-      <main>
-        <section id="categoriesView">
-          <h2>Choose an area of concern</h2>
-          <p class="lead">Select a category to browse common issues or use the guided builder to craft a custom SMART target.</p>
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="SMART Target Builder home">
+      <span class="brand-mark" aria-hidden="true">T</span>
+      <span><strong>SMART Target Builder</strong><small>ProMonitor-ready learner targets</small></span>
+    </a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
+      <span class="theme-symbol" aria-hidden="true">◐</span>
+      <span data-theme-label>Light mode</span>
+      <span class="toggle-track" aria-hidden="true"><span class="toggle-dot"></span></span>
+    </button>
+  </header>
 
-          <div id="categoriesGrid" class="grid" role="list"></div>
+  <main id="main-content">
+    <section class="hero" id="home" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Learner progress workspace</p>
+        <h1 id="page-title">Turn a broad concern into a useful SMART target.</h1>
+        <p class="hero-copy">Select an area of concern, describe the required improvement and generate a clear target ready to copy into ProMonitor.</p>
+      </div>
+      <aside class="privacy-note" aria-label="Privacy reminder">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.8 2.9 8.4 7 10 4.1-1.6 7-5.2 7-10V6l-7-3Zm0 4a2 2 0 0 1 2 2v1h1v5H9v-5h1V9a2 2 0 0 1 2-2Zm0 1.4a.6.6 0 0 0-.6.6v1h1.2V9a.6.6 0 0 0-.6-.6Z"/></svg>
+        <div><strong>Your information stays here</strong><p>Do not enter learner names, medical information, safeguarding details or other personal data. This app does not store or send target content.</p></div>
+      </aside>
+    </section>
 
-          <div class="tools">
-            <button id="guidedBtn">Guided target builder</button>
-            <button id="startNewBtn" class="secondary" hidden>Start new target</button>
+    <section class="search-panel" aria-labelledby="search-heading">
+      <div>
+        <h2 id="search-heading">What would you like the learner to improve?</h2>
+        <p>Search in plain language or browse all areas below.</p>
+      </div>
+      <form class="search-form" data-search-form role="search">
+        <label class="visually-hidden" for="search">Describe the concern</label>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 19-4.4-4.4a7 7 0 1 0-1 1L19 20l1-1ZM5.5 10.5a5 5 0 1 1 10 0 5 5 0 0 1-10 0Z"/></svg>
+        <input id="search" type="search" autocomplete="off" maxlength="140" placeholder="Describe the concern without using the learner’s name…">
+        <button class="primary-button" type="submit">Search targets</button>
+      </form>
+      <p class="search-examples">Try: <button type="button" data-search-example="misses Fridays">misses Fridays</button> · <button type="button" data-search-example="phone use">phone use</button> · <button type="button" data-search-example="not checking Canvas">not checking Canvas</button></p>
+      <div class="field-message field-message-warning" data-search-warning hidden role="alert"></div>
+    </section>
+
+    <section class="view" data-view="categories" aria-labelledby="categories-heading">
+      <div class="section-heading">
+        <div><p class="eyebrow">Browse by category</p><h2 id="categories-heading">Choose an area of concern</h2></div>
+        <button class="secondary-button" type="button" data-guided-start>Build a custom target</button>
+      </div>
+      <div class="category-grid" data-category-grid aria-live="polite"></div>
+    </section>
+
+    <section class="view" data-view="search" aria-labelledby="results-heading" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">Suggested matches</p><h2 id="results-heading">Search results</h2><p data-results-summary></p></div>
+        <button class="secondary-button" type="button" data-return-categories>Browse all categories</button>
+      </div>
+      <div class="issue-grid" data-search-results></div>
+      <div class="empty-state" data-no-results hidden>
+        <span aria-hidden="true">?</span>
+        <h3>No close matches found</h3>
+        <p>Try fewer words, browse the categories, or create a custom target.</p>
+        <button class="primary-button" type="button" data-guided-start>Build a custom target</button>
+      </div>
+    </section>
+
+    <section class="view" data-view="issues" aria-labelledby="issues-heading" hidden>
+      <button class="back-button" type="button" data-back-categories>← All areas</button>
+      <div class="section-heading">
+        <div><p class="eyebrow" data-selected-category-label>Selected area</p><h2 id="issues-heading" data-issues-heading>Choose the specific issue</h2><p data-issues-description></p></div>
+      </div>
+      <div class="issue-grid" data-issue-grid></div>
+    </section>
+
+    <section class="view builder-view" data-view="builder" aria-labelledby="builder-heading" hidden>
+      <div class="builder-toolbar">
+        <button class="back-button" type="button" data-builder-back>← Change issue</button>
+        <div class="step-indicator" aria-label="Step 3 of 3"><span>1</span><span>2</span><span class="active">3</span><strong>Build target</strong></div>
+      </div>
+
+      <div class="builder-grid">
+        <form class="form-stack" id="target-form" autocomplete="off" novalidate>
+          <section class="card builder-card">
+            <div class="card-header">
+              <p class="eyebrow">Target details</p>
+              <h2 id="builder-heading">Shape the expectation</h2>
+              <p>Recommended wording is ready to use. Adjust only what the learner needs.</p>
+            </div>
+            <div class="card-body field-stack">
+              <div class="context-summary">
+                <span class="context-icon" data-context-icon aria-hidden="true"></span>
+                <div><span data-category-value>Custom target</span><strong data-issue-value>Choose your own wording</strong></div>
+                <button type="button" data-change-issue>Change</button>
+              </div>
+
+              <div class="field">
+                <label for="action">Expected learner action <span class="required" aria-hidden="true">*</span></label>
+                <p class="input-guidance">Write directly to the learner, beginning with an action such as “attend”, “complete” or “check”.</p>
+                <textarea id="action" rows="3" maxlength="300" required></textarea>
+                <div class="field-footer"><span class="field-error" data-error-for="action"></span><span data-count-for="action">0 / 300</span></div>
+              </div>
+
+              <fieldset class="field">
+                <legend>Frequency or success measure <span class="required" aria-hidden="true">*</span></legend>
+                <div class="choice-grid" data-measure-choices></div>
+                <label class="custom-field" data-custom-measure-wrap hidden for="custom-measure"><span>Custom measure</span><input id="custom-measure" type="text" maxlength="160" placeholder="Describe how success will be measured"></label>
+                <span class="field-error" data-error-for="measure"></span>
+              </fieldset>
+
+              <fieldset class="field">
+                <legend>Review period <span class="required" aria-hidden="true">*</span></legend>
+                <div class="choice-grid compact" data-duration-choices>
+                  <label><input type="radio" name="duration" value="1 week"><span>1 week<small data-date-for="1 week"></small></span></label>
+                  <label><input type="radio" name="duration" value="2 weeks"><span>2 weeks<small data-date-for="2 weeks"></small></span></label>
+                  <label><input type="radio" name="duration" value="3 weeks"><span>3 weeks<small data-date-for="3 weeks"></small></span></label>
+                  <label><input type="radio" name="duration" value="4 weeks"><span>4 weeks<small data-date-for="4 weeks"></small></span></label>
+                  <label><input type="radio" name="duration" value="next review"><span>Next review</span></label>
+                  <label><input type="radio" name="duration" value="date"><span>Choose date</span></label>
+                </div>
+                <label class="custom-field" data-review-date-wrap hidden for="review-date"><span>Review date</span><input id="review-date" type="date"></label>
+                <span class="field-error" data-error-for="duration"></span>
+              </fieldset>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="evidence">Evidence source</label>
+                  <select id="evidence"></select>
+                  <label class="custom-field" data-custom-evidence-wrap hidden for="custom-evidence"><span>Custom evidence</span><input id="custom-evidence" type="text" maxlength="100"></label>
+                </div>
+                <div class="field">
+                  <label for="reviewer">Reviewer</label>
+                  <select id="reviewer"></select>
+                  <label class="custom-field" data-custom-reviewer-wrap hidden for="custom-reviewer"><span>Custom reviewer role</span><input id="custom-reviewer" type="text" maxlength="100" placeholder="Use a role, not a name"></label>
+                </div>
+              </div>
+
+              <div class="field-message field-message-warning" data-form-warning hidden role="alert"></div>
+            </div>
+          </section>
+
+          <div class="form-actions">
+            <span class="readiness" data-readiness>Complete the required fields</span>
+            <div>
+              <button class="secondary-button" type="button" data-clear-form>Clear</button>
+              <button class="primary-button" type="submit">Generate target</button>
+            </div>
           </div>
-        </section>
+        </form>
 
-        <section id="issuesView" class="hidden">
-          <button id="backToCategories" class="link">← Back to categories</button>
-          <h2 id="issuesTitle">Issues</h2>
-          <div id="issuesList" class="list" role="list"></div>
-        </section>
-
-        <section id="builderView" class="hidden">
-          <button id="backToIssues" class="link">← Back</button>
-          <h2 id="builderTitle">Target builder</h2>
-          <form id="builderForm">
-            <fieldset>
-              <legend>Required fields</legend>
-
-              <label for="categoryField">Area of concern</label>
-              <input id="categoryField" name="category" readonly />
-
-              <label for="issueField">Specific issue</label>
-              <input id="issueField" name="issue" readonly />
-
-              <label for="actionField">Expected learner action</label>
-              <input id="actionField" name="action" />
-
-              <label for="measureField">Frequency or success measure</label>
-              <select id="measureField" name="measure"></select>
-              <input id="customMeasure" placeholder="Custom measure (optional)" aria-label="Custom measure" />
-
-              <label for="durationField">Review period</label>
-              <select id="durationField" name="duration">
-                <option value="1 week">One week</option>
-                <option value="2 weeks">Two weeks</option>
-                <option value="3 weeks">Three weeks</option>
-                <option value="4 weeks">Four weeks</option>
-                <option value="by date">By selected date</option>
-                <option value="next review">At the next progress review</option>
-                <option value="custom">Custom</option>
-              </select>
-              <input id="reviewDate" type="date" aria-label="Review date" />
-              <input id="customDuration" placeholder="Custom period (e.g. 10 working days)" aria-label="Custom period" />
-
-              <label for="evidenceField">Evidence source</label>
-              <select id="evidenceField" name="evidence"></select>
-              <input id="customEvidence" placeholder="Custom evidence (optional)" aria-label="Custom evidence" />
-
-              <label for="reviewerField">Reviewer</label>
-              <select id="reviewerField" name="reviewer"></select>
-              <input id="customReviewer" placeholder="Custom reviewer (optional)" aria-label="Custom reviewer" />
-
-            </fieldset>
-
-            <div class="form-actions">
-              <button id="generateBtn" type="button">Generate target</button>
-              <button id="clearBtn" type="button" class="secondary">Clear</button>
+        <aside class="preview-stack" aria-labelledby="preview-heading">
+          <section class="card preview-card">
+            <div class="card-header preview-header">
+              <div><p class="eyebrow">Live preview</p><h2 id="preview-heading">Generated target</h2></div>
+              <span class="status-badge" data-preview-status><span aria-hidden="true"></span>Not generated</span>
             </div>
-          </form>
+            <div class="card-body">
+              <div class="preview-empty" data-preview-empty>
+                <span class="preview-mark" aria-hidden="true">✦</span>
+                <h3>Ready when you are</h3>
+                <p>Complete the target details, then generate a clear learner target and support plan.</p>
+              </div>
 
-          <div id="preview" class="card hidden" aria-live="polite">
-            <h3>Generated target</h3>
-            <label for="learnerTarget">Learner target</label>
-            <textarea id="learnerTarget" rows="5"></textarea>
-            <div class="meta">
-              <span id="charCount">0</span> characters
+              <div data-preview-output hidden>
+                <div class="output-block">
+                  <div class="output-heading"><label for="learner-target">Learner SMART target</label><span data-target-count>0 characters</span></div>
+                  <textarea id="learner-target" rows="9" maxlength="1200"></textarea>
+                  <p class="length-note" data-length-note hidden>The target is quite long. Consider the shorter version before copying.</p>
+                </div>
+
+                <div class="variant-bar" aria-label="Target wording variants">
+                  <span>Adjust tone</span>
+                  <button type="button" data-variant="supportive">More supportive</button>
+                  <button type="button" data-variant="firm">Firmer</button>
+                  <button type="button" data-variant="short">Shorten</button>
+                  <button type="button" data-variant="detailed">Add detail</button>
+                  <button type="button" data-variant="reset">Reset</button>
+                </div>
+
+                <details class="secondary-output" open>
+                  <summary>Staff support action</summary>
+                  <label class="visually-hidden" for="staff-action">Staff support action</label>
+                  <textarea id="staff-action" rows="4" maxlength="700"></textarea>
+                </details>
+                <details class="secondary-output">
+                  <summary>Review note template</summary>
+                  <label class="visually-hidden" for="review-note">Review note template</label>
+                  <textarea id="review-note" rows="4" maxlength="700"></textarea>
+                </details>
+
+                <div class="copy-actions">
+                  <button class="primary-button" type="button" data-copy="learner">Copy learner target</button>
+                  <button class="secondary-button" type="button" data-copy="staff">Copy staff action</button>
+                  <button class="secondary-button" type="button" data-copy="review">Copy review note</button>
+                  <button class="secondary-button" type="button" data-copy="all">Copy all</button>
+                </div>
+              </div>
             </div>
+          </section>
 
-            <h4>Staff support action</h4>
-            <textarea id="staffAction" rows="3"></textarea>
-
-            <h4>Review note</h4>
-            <textarea id="reviewNote" rows="3"></textarea>
-
-            <div class="preview-actions">
-              <button id="copyLearner">Copy learner target</button>
-              <button id="copyStaff">Copy staff support action</button>
-              <button id="copyReview">Copy review note</button>
-              <button id="copyAll">Copy all</button>
-              <button id="printBtn" class="secondary">Print</button>
+          <section class="card smart-card" aria-labelledby="smart-heading">
+            <div class="card-header"><h3 id="smart-heading">SMART quality check</h3><p>A prompt for professional judgement, not a guarantee.</p></div>
+            <div class="smart-grid" data-smart-grid>
+              <div data-smart="specific"><span aria-hidden="true">S</span><div><strong>Specific</strong><small>Clear learner action</small></div><b>—</b></div>
+              <div data-smart="measurable"><span aria-hidden="true">M</span><div><strong>Measurable</strong><small>Observable success measure</small></div><b>—</b></div>
+              <div data-smart="achievable"><span aria-hidden="true">A</span><div><strong>Achievable</strong><small>Realistic wording</small></div><b>—</b></div>
+              <div data-smart="relevant"><span aria-hidden="true">R</span><div><strong>Relevant</strong><small>Linked to the concern</small></div><b>—</b></div>
+              <div data-smart="timebound"><span aria-hidden="true">T</span><div><strong>Time-bound</strong><small>Clear review point</small></div><b>—</b></div>
             </div>
+            <p class="professional-note">Use professional judgement and adapt the wording to reflect the learner’s individual circumstances.</p>
+          </section>
+        </aside>
+      </div>
 
-            <div id="variantControls" class="variant-controls">
-              <button data-variant="supportive">Make more supportive</button>
-              <button data-variant="firmer">Make firmer</button>
-              <button data-variant="short">Short ProMonitor version</button>
-              <button data-variant="detailed">Add more detail</button>
-              <button data-variant="reset">Reset recommended wording</button>
-            </div>
+      <div class="post-actions" data-post-actions hidden>
+        <button class="secondary-button" type="button" data-print>Print target</button>
+        <button class="secondary-button" type="button" data-return-categories>Return to categories</button>
+        <button class="primary-button" type="button" data-start-new>Start new target</button>
+      </div>
+    </section>
 
-            <div id="smartQuality" class="quality">
-              <h4>SMART check</h4>
-              <ul>
-                <li id="qSpecific">Specific: <span class="status">—</span></li>
-                <li id="qMeasurable">Measurable: <span class="status">—</span></li>
-                <li id="qAchievable">Achievable: <span class="status">—</span></li>
-                <li id="qRelevant">Relevant: <span class="status">—</span></li>
-                <li id="qTimebound">Time-bound: <span class="status">—</span></li>
-              </ul>
-              <p class="muted small">Use professional judgement and adapt the wording to reflect the learner’s individual circumstances.</p>
-            </div>
+    <section class="principles" aria-labelledby="principles-heading">
+      <div><p class="eyebrow">Built for thoughtful conversations</p><h2 id="principles-heading">Clear expectations, balanced with support.</h2></div>
+      <div class="principle-grid">
+        <article><span aria-hidden="true">✓</span><h3>Rule-based and consistent</h3><p>The same choices produce the same wording. No external AI is involved.</p></article>
+        <article><span aria-hidden="true">◎</span><h3>Targets and support stay separate</h3><p>Learner actions never absorb responsibilities that belong to staff.</p></article>
+        <article><span aria-hidden="true">◇</span><h3>Designed for professional judgement</h3><p>Edit every draft to reflect the learner’s circumstances and college policy.</p></article>
+      </div>
+    </section>
+  </main>
 
-          </div>
+  <footer>
+    <p><strong>Target Builder provides suggested wording only.</strong> Staff should use professional judgement, follow college policies and adapt targets to the learner’s circumstances. Safeguarding, welfare and support concerns should be managed through the appropriate college processes.</p>
+    <p>Rule-based · No learner-data storage · No analytics</p>
+  </footer>
 
-        </section>
-
-        <section id="searchResults" class="hidden">
-          <button id="backFromSearch" class="link">← Back</button>
-          <h2>Search results</h2>
-          <div id="searchList" class="list"></div>
-          <p id="noResults" class="muted hidden">No results found. Try different keywords or open the guided builder.</p>
-        </section>
-
-        <div id="status" aria-live="polite" class="sr-only"></div>
-      </main>
-
-      <footer class="site-footer">
-        <p>Target Builder provides suggested wording only. Staff should use professional judgement, follow college policies and adapt targets to the learner’s circumstances. Safeguarding, welfare and support concerns should be managed through the appropriate college processes.</p>
-        <p class="muted small">Do not enter learner names, medical information, safeguarding details or other personal data. This website does not store submitted information.</p>
-        <p class="muted small">© 2026 Target Builder</p>
-      </footer>
-    </div>
-
-    <script src="./app.js" defer></script>
-  </body>
+  <div class="toast" data-toast role="status" aria-live="polite" aria-atomic="true"></div>
+  <script src="./app.js" defer></script>
+</body>
 </html>

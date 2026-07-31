@@ -1,60 +1,190 @@
-# Target Builder
+# SMART Target Builder
 
-Target Builder helps teaching staff create clear, measurable SMART learner targets suitable for copying into ProMonitor or similar learner-management systems. It is a static, browser-based tool intended for teaching staff (personal tutors, subject lecturers, success coaches) to quickly convert a general concern into a well-worded SMART target.
+SMART Target Builder is a static, browser-based tool for teaching staff who need to create clear, measurable learner targets for ProMonitor or a similar learner-management system.
 
-Key points
-- No learner names or personal data should be entered.
-- The site does not store any data and does not send information externally.
-- All target generation runs in the browser using rule-based templates (no AI).
+It helps a lecturer move from a broad concern—such as poor attendance, missed coursework or limited participation—to a specific learner action, success measure and review point. It also creates a separate staff support action and review note.
 
-Structure
-- index.html — The single-page application UI.
-- styles.css — Styles and responsive layout.
-- app.js — All interactive behaviour implemented in vanilla JavaScript.
-- data/targets.json — Template data, categories, issues and templates.
+## Key principles
 
-Running locally
-1. Clone the repository.
-2. Serve files with a simple local web server (required because some browsers block fetch from file://):
+- Target generation is rule-based and takes place entirely in the browser.
+- The app does not use generative AI or an external API.
+- Learner names and other personal or sensitive information are not required.
+- Form and target content is not stored, logged or sent anywhere.
+- The only saved browser preference is light or dark theme.
+- Staff remain responsible for reviewing and adapting every target.
+
+## Intended users
+
+- Personal tutors
+- Subject lecturers
+- Success Coaches
+- Curriculum leads
+- English and maths lecturers
+- Work experience staff
+
+## Project structure
+
+- `index.html` — semantic single-page interface
+- `styles.css` — responsive light and dark themes
+- `app.js` — navigation, validation, search and rule-based target generation
+- `data/targets.json` — categories, issues and recommended target components
+
+There are no npm packages, build steps, cookies, analytics or server-side components.
+
+## Run locally
+
+Loading the JSON target library requires a local web server. From the repository folder, run:
 
 ```bash
 python -m http.server 8000
 ```
 
-3. Open http://localhost:8000 in your browser.
+Then open:
 
-Publishing with GitHub Pages
-1. Push the repository to GitHub.
-2. In the repository Settings → Pages, select the main branch and / (root) as the publishing source, or enable GitHub Pages from the repository settings.
-3. The site will be available at https://<username>.github.io/<repository-name>/
+```text
+http://localhost:8000/
+```
 
-Adding categories, issues or templates
-- Edit `data/targets.json`.
-- Each template object includes fields such as `id`, `category`, `issue`, `title`, `defaultAction`, `measureOptions`, `recommendedDuration`, `evidenceOptions`, `reviewerOptions`, `targetTemplate`, `supportActionTemplate`, `reviewNoteTemplate`, `aliases`, and `tags`.
-- To add a new issue: append a new template record to the `templates` array. Keep `category` consistent for grouping.
+Opening `index.html` directly with a `file://` URL may prevent the browser from loading `data/targets.json`.
 
-Keyword matching
-- The search matches terms against category, issue, title, aliases and tags.
-- Add `aliases` to template records for common search phrases (e.g., "Friday", "patterned absence").
+## Publish with GitHub Pages
 
-Privacy & safeguarding
-- Do not enter learner names, medical details, safeguarding information, phone numbers, or emails.
-- If a free-text field appears to contain an email address, phone number or an obvious numeric ID, a browser-side warning is shown. This is not exhaustive — follow college safeguarding procedures if you have concerns.
+1. Push the project to the repository's `main` branch.
+2. Open the repository on GitHub.
+3. Select **Settings → Pages**.
+4. Under **Build and deployment**, select **Deploy from a branch**.
+5. Choose `main` and `/ (root)`.
+6. Save and wait for GitHub Pages to publish the site.
 
-Accessibility
-- Semantic HTML, visible focus states and keyboard navigation have been implemented.
-- ARIA live regions are used for copy status messages.
-- The design respects reduced-motion preferences.
+All project paths are relative, so the app works when published beneath a repository path such as:
 
-Known limitations
-- The personal-data detection is heuristic and will not catch everything.
-- The templates are stored in JSON and loaded client-side; editing templates requires changing the JSON and redeploying the site.
-- No printing layout beyond the browser's default print behaviour.
+```text
+https://username.github.io/repository-name/
+```
 
-Future improvements
-- Departmental or college template packs
-- Favorites and quick-recall templates
+## Target data
+
+`data/targets.json` contains a `categories` array. Each category includes:
+
+- `id`
+- `name`
+- `icon`
+- `description`
+- `evidenceOptions`
+- `reviewerOptions`
+- `supportTemplate`
+- `issues`
+
+Each issue includes:
+
+- `id`
+- `issue`
+- `title`
+- `action`
+- `measure`
+- `measures`
+- `duration`
+- `aliases`
+- optional issue-specific `support`
+
+### Add a category
+
+Add another object to the top-level `categories` array. Use a unique lowercase, hyphenated `id`, an icon name already supported by `app.js`, and at least one issue.
+
+### Add an issue
+
+Add an object to the relevant category's `issues` array. Keep the wording learner-facing and actionable. The `action` should normally begin with a verb such as “attend”, “complete”, “check” or “contact”.
+
+### Edit a target
+
+Adjust the issue's `action`, `measures`, `duration`, evidence options or support wording. Generation combines those approved components with shared review and evidence wording.
+
+Recommended duration values are:
+
+- `1 week`
+- `2 weeks`
+- `3 weeks`
+- `4 weeks`
+- `date`
+- `next review`
+
+### Keyword matching
+
+Search normalises the query and compares it with:
+
+- category name and description
+- issue and title
+- aliases
+- learner action
+- success measures
+
+Matches in the issue, title or aliases receive a stronger score. Add realistic plain-language aliases such as `misses Fridays`, `phone use` or `not checking Canvas`.
+
+## Privacy and safeguarding
+
+Do not enter:
+
+- learner names
+- medical or safeguarding details
+- email addresses
+- phone numbers
+- student IDs
+- other identifiable personal information
+
+The app performs a limited browser-side check for email addresses, phone numbers and obvious labelled student IDs. This is only a prompt and cannot detect every form of personal information.
+
+Safeguarding, welfare and support concerns must be managed through the appropriate college procedures.
+
+## Accessibility
+
+The interface aims to follow WCAG 2.2 AA principles through:
+
+- semantic headings, sections, forms and buttons
+- a skip link
+- visible keyboard focus
+- labelled native form controls
+- non-colour selected indicators
+- accessible live status messages
+- 44-pixel minimum controls
+- light and dark colour schemes
+- reduced-motion support
+- responsive layouts without custom dropdown widgets
+
+Automated checks do not replace testing with assistive technology or disabled users.
+
+## Testing checklist
+
+- Open every category and confirm every issue can reach the builder.
+- Generate a target for each issue.
+- Check one-, two-, three- and four-week calculated dates.
+- Check a custom review date.
+- Test custom measure, evidence and reviewer fields.
+- Test search examples and a no-result query.
+- Test target variants and manual editing.
+- Test all copy actions.
+- Test the privacy warning with a dummy email, phone number and labelled student ID.
+- Test clear and start-new confirmation behaviour.
+- Test light and dark themes.
+- Test keyboard navigation and visible focus.
+- Test common desktop, tablet and mobile widths.
+- Check the browser console for errors.
+
+## Known limitations
+
+- Generation is rule-based and cannot understand context like an AI system.
+- Personal-data detection is deliberately simple and cannot detect names or every identifier.
+- Review dates add calendar weeks rather than teaching-calendar weeks.
+- Content changes require editing the JSON file and redeploying the site.
+- The app does not save favourites, drafts or target history, by design.
+- The SMART panel checks the presence and broad shape of target components; it cannot judge whether a target is professionally appropriate.
+
+## Possible future improvements
+
+- College branding options
+- Approved department-specific target packs
+- Importing a centrally managed target library
 - Printable learner action plans
-- Optional secure server-side rewrite feature (would require appropriate approvals)
-
-Thank you for using Target Builder. Contributions, suggested templates and improvements are welcome via pull requests.
+- An administrator template editor
+- ProMonitor integration, subject to available APIs and approval
+- A secure server-side AI rewriting feature, subject to governance and approval
+- Anonymous analytics, only with consent and an appropriate privacy basis
